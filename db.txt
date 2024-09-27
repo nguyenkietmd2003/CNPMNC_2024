@@ -1,0 +1,192 @@
+
+
+use db_iphone_store;
+
+
+
+create table User(
+  id_user int primary key,
+  name varchar(100) not NULL,
+  phone varchar(10) not null,
+  email varchar(100) not null,
+  password varchar(1000) not null,
+  address varchar(100),
+  role ENUM('admin','user','guest') not null,
+  profile varchar(200),
+  registeredAT datetime,
+  lastLogin datetime
+)
+----------------------------------------------------------------------------------------
+
+create table ProductInformation(
+id_productInformation int PRIMARY key auto_increment,
+brand varchar(10),
+operating_System varchar(20),
+ram FLOAT,
+screen float,
+model varchar(20),
+rom float,
+CPU varchar(50),
+battery varchar(10),
+content varchar(100),
+id_product int,
+FOREIGN KEY (id_product) REFERENCES Product(id_product)
+)
+
+
+
+create table ProductReview(
+id_productReview int PRIMARY key auto_increment,
+title varchar(100),
+content varchar(1000),
+createdAT datetime,
+rating int check(rating >= 1 and rating <= 5),
+public BOOLEAN NOT NULL DEFAULT TRUE,
+id_product int,
+id_userReview int,
+FOREIGN KEY(id_userReview) REFERENCES UserReview(id_userReview),
+FOREIGN KEY(id_product) REFERENCES Product(id_product)
+)
+
+create table UserReview(
+id_userReview int PRIMARY key auto_increment,
+gmail VARCHAR (10),
+content varchar(100),
+rating int check(rating >= 1 and rating <= 5),
+createAT datetime ,
+public BOOLEAN not null DEFAULT true
+)
+
+
+create table Category(
+ id_category int PRIMARY KEY,
+ title varchar(20),
+ img varchar(200)
+)
+create table Category_Product(
+id_category int, 
+id_product int,
+FOREIGN KEY (id_product) REFERENCES Product(id_product),
+FOREIGN KEY (id_category) REFERENCES Category(id_category)
+)
+
+create table Product(
+id_product int PRIMARY KEY auto_increment,
+title varchar(50) not null,
+summary varchar(1000) not null,
+discount float DEFAULT 0
+);
+
+
+-- -------------------------------------------------------------------------------------------------------------------------------------------
+
+create table `Order`(
+ id_order int primary key ,
+ name varchar(50),
+ phone varchar(10),
+ addresss varchar(100),
+ total float DEFAULT 0,
+ discount float DEFAULT 0,
+ id_user int,
+ FOREIGN KEY (id_user) REFERENCES User(id_user)
+)
+
+create table OrderItem (
+
+id_orderItem int primary key, 
+id_order int,
+id_product int,
+FOREIGN KEY (id_order) REFERENCES `Order`(id_order),
+FOREIGN KEY(id_product) REFERENCES Product(id_product)
+)
+
+
+
+create table Transaction(
+
+id_transaction int PRIMARY key ,
+status BOOLEAN DEFAULT false,
+createdAT datetime,
+id_user int,
+id_order int,
+FOREIGN KEY (id_user) REFERENCES User(id_user),
+FOREIGN KEY (id_order) REFERENCES `Order`(id_order)
+)
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+create table Cart(
+id_cart int PRIMARY KEY,
+id_user int,
+FOREIGN KEY (id_user) REFERENCES User(id_user)
+)
+
+create table CartItem(
+ id_cartItem int primary key,
+ quantity int,
+ price float,
+ discount float DEFAULT 0,
+ createAT datetime,
+ id_product int,
+ id_cart int,
+ FOREIGN KEY (id_product) REFERENCES Product(id_product),
+ FOREIGN KEY (id_cart) REFERENCES Cart(id_cart)
+)
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------- ALTER TABLE  --------------------------------------------------------------------
+alter table ProductInformation add hot BOOLEAN DEFAULT false
+alter table ProductInformation add createdAT datetime
+alter table ProductInformation add img varchar(200)
+
+
+----------------------------------------------------------------------------------------    INSERT VALUE  ------------------------------------------------------
+
+select * from User;
+
+insert into User values(1111, 'Nguyễn Tuấn Kiệt', '0356828625','nguyentuankietmd2003@gmail.com','kiet1234','Quảng Ngãi City', 'admin', '', '2024-09-26 14:30:00','2024-09-26 14:30:00')
+insert into User values(2222, 'Nguyễn Văn Kiện', '0476583904','nguyenvankiensv@gmail.com','kienn1234','HCM City', 'user', '', '2024-09-26 14:30:00','2024-09-26 14:30:00')
+insert into User values(3333, 'Nguyễn Thị Hoa', '0943438843','nguyenhoamd@gmail.com','hoanguyen','Bình Dương City', 'user', '', '2024-09-26 14:30:00','2024-09-26 14:30:00')
+
+
+select * from Product;
+
+insert into Product values(100, 'Iphone 15 Pro Max' ,  'iPhone 15 Pro Max là mẫu smartphone cao cấp của Apple, ra mắt với thiết kế sang trọng và hiện đại. Máy sở hữu màn hình Super Retina XDR 6.7 inch, mang lại hình ảnh sắc nét và màu sắc sống động. Về hiệu suất, iPhone 15 Pro Max được trang bị chip A17 Pro, cho khả năng xử lý mạnh mẽ và tiết kiệm năng lượng.' ,0)
+insert into Product values(101, 'Iphone 16 Pro Max' ,  'iPhone 16 Pro Max có màn hình Super Retina XDR 6.7 inch, chip A18 Pro mạnh mẽ, và hệ thống camera ba ống kính 48MP với nhiều tính năng chụp ảnh nâng cao. Thiết kế sang trọng, hỗ trợ USB-C, và thời lượng pin cải thiện, mang lại trải nghiệm người dùng tuyệt vời.' ,0)
+insert into Product values(102,'Iphone SE (Thế hệ 3)' ,  'iPhone SE (thế hệ thứ 3) có thiết kế nhỏ gọn, màn hình Retina 4.7 inch. Máy được trang bị chip A15 Bionic mạnh mẽ, cho hiệu suất cao và khả năng xử lý mượt mà. Camera 12MP hỗ trợ chụp ảnh sắc nét và quay video 4K. iPhone SE cũng có tính năng nhận diện khuôn mặt Touch ID, và thời lượng pin tốt, phù hợp cho những ai yêu thích smartphone nhỏ gọn nhưng vẫn mạnh mẽ.' ,0)
+
+
+select * from ProductInformation
+
+
+insert into ProductInformation values(1, 'Iphone','IOS 15 version 15.2',16, 6.1, 'Iphone 15 ProMax',512, 'Chip A17 Pro - tốc độ GPU 4.75hz','4000mha ' ,'', 100,FALSE,'2024-01-02 14:02:45','https://m.media-amazon.com/images/I/51UtM-A3fdL._AC_SX679_.jpg')
+insert into ProductInformation values(2, 'Iphone','IOS 16 version 16.8',16, 6.1, 'Iphone 16 ProMax',512, 'Chip A18 Pro - tốc độ GPU 5.75hz','4600mha ' ,'', 101,FALSE,'2024-01-02 14:02:45','https://m.media-amazon.com/images/I/51ysuS9QwTL._AC_SX679_.jpg')
+insert into ProductInformation values(3, 'Iphone','IOS 14 version 14.8',8, 5.1, 'Iphone SE',128, 'Chip A11 Pro - tốc độ GPU 5.75hz','4600mha ' ,'', 102,FALSE,'2024-01-02 14:02:45','https://m.media-amazon.com/images/I/716KLI9CI6L.__AC_SY445_SX342_QL70_FMwebp_.jpg')
+
+-------
+SELECT * from UserReview;
+
+insert into UserReview values(10,'nguyenthia@gmail.com','Điện thoại sài pin quá yếu, on screen nửa ngày là hết pin', 4, '2024-01-02 14:02:45',true)
+insert into UserReview values(11,'nguyenvanhoa@gmail.com','Điện thoại quá nặng, cầm không sướng tay', 2, '2024-01-02 14:02:45',true)
+insert into UserReview values(12,'nguyenhoahong@gmail.com','Điện thoại sài nóng, thường xuyên nóng khi tôi chơi game', 3, '2024-01-02 14:02:45',true)
+
+
+SELECT * from ProductReview;
+
+
+insert into ProductReview values(1, '','Điện thoại sài pin quá yếu, on screen nửa ngày là hết pin','2024-01-02 14:02:45',4,100,10)
+insert into ProductReview values(1, '','Điện thoại sài pin quá yếu, on screen nửa ngày là hết pin','2024-01-02 14:02:45',4,100,11)
+insert into ProductReview values(1, '','Điện thoại sài pin quá yếu, on screen nửa ngày là hết pin','2024-01-02 14:02:45',4,100,12)
