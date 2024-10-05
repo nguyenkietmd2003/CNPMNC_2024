@@ -1,0 +1,66 @@
+
+
+use db_iphone_store;
+
+
+
+create table User(
+  id_user int primary key,
+  name varchar(100) not NULL,
+  phone varchar(10) not null,
+  email varchar(100) not null,
+  password varchar(1000) not null,
+  address varchar(100),
+  role ENUM('admin','user','guest') not null,
+  profile varchar(200),
+  registeredAT datetime,
+  lastLogin datetime
+)
+
+create table Order(
+ id_order int primary key ,
+ 
+ 
+ 
+ id_user int,
+ id_transaction int,
+ FOREIGN KEY (id_user) REFERENCES User(id_user),
+ FOREIGN KEY (id_transaction) REFERENCES 
+ 
+ 
+)
+create table Transaction()
+
+create table Product(
+id_product int PRIMARY KEY auto_increment,
+title varchar(50) not null,
+summary varchar(1000) not null,
+price float default 0,
+discount float DEFAULT 0,
+id_user int,
+id_productReview int,
+FOREIGN KEY (id_user) REFERENCES User(id_user),
+FOREIGN KEY(id_productReview) REFERENCES Product(id_productReview)
+);
+
+
+create table ProductReview(
+id_productReview int PRIMARY key auto_increment,
+title varchar(100),
+content varchar(1000),
+createdAT datetime,
+rating int check(rating >= 1 and rating <= 5),
+public BOOLEAN NOT NULL DEFAULT TRUE,
+id_product int,
+id_userReview int,
+FOREIGN KEY(id_userReview) REFERENCES UserReview(id_userReview)
+)
+
+create tabel UserReview(
+id_userReview int PRIMARY key auto_increment,
+gmail VARCHAR (10),
+content varchar(100),
+rating int check(rating >= 1 and rating <= 5),
+createAT datetime ,
+public BOOLEAN not null DEFAULT true
+)
