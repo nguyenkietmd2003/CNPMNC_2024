@@ -1,27 +1,50 @@
 //
 import { Button, Checkbox, Form, Input, Flex, notification } from "antd";
-import { getAllUser, loginAPI } from "../../util/api.js";
+import { loginAPI } from "../../util/api.js";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/wrapContext.jsx";
 
 //
 const LoginPage = () => {
   //
   const navigate = useNavigate();
+  const { auth, setAuth, fetchCart, setCart } = useContext(AuthContext);
 
   const onFinish = async (data) => {
-    console.log(">>> data from login ", data);
     try {
       const result = await loginAPI(data.email, data.password);
       console.log(">> check result", result);
+
       if (result.status === 200) {
-        notification.success({
-          message: "Login successful",
-          description: "You have logged in successfully.",
+        const userData = {
+          id: result.message.data.id ?? 0,
+          email: result.message.data.email ?? "",
+          name: result.message.data.name ?? "",
+          role: result.message.data.role ?? "",
+        };
+
+        console.log("User Data:", userData); // In ra userData để kiểm tra
+        console.log("User Role:", userData.role); // In ra vai trò để kiểm tra
+
+        localStorage.setItem("info", JSON.stringify(result.message));
+        await setAuth({
+          isAuthenticated: true,
+          user: userData,
         });
-        navigate("/");
+
+        if (userData.role === "admin") {
+          navigate("/admin");
+        } else {
+          await fetchCart();
+          navigate("/");
+          window.location.reload();
+        }
+
         return;
       }
+
       notification.error({
         message: "Login failed",
         description: "Email or password incorrect",
@@ -72,7 +95,7 @@ const LoginPage = () => {
         </Form.Item>
         <Form.Item>
           <Flex justify="space-between" align="center">
-            <a href="">Forgot password</a>
+            <Link to={"/forgot-password"}>Forgot password</Link>
           </Flex>
         </Form.Item>
 

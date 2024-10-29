@@ -5,7 +5,8 @@ const Footer = () => {
     <div>
       <div>
         <div>
-          Made with <HeartOutlined className="text-red-500" /> by K.{" "}
+          Xoan Store
+          <HeartOutlined className="text-red-500" />{" "}
         </div>
       </div>
     </div>
