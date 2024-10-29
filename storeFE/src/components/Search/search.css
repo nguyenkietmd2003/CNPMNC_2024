@@ -1,4 +1,0 @@
-:where(.css-dev-only-do-not-override-5wsri9).ant-menu-light.ant-menu-horizontal
-  > .ant-menu-item-selected::after {
-  border-bottom-color: "#FFFFFF";
-}
