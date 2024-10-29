@@ -6,6 +6,18 @@ import ErrorPage from "./pages/errorpage/ErrorPage"; // Đảm bảo tên file v
 import LoginPage from "./pages/loginPage/loginpage";
 import RegisterPage from "./pages/registerPage/registerPage";
 import SearchComponent from "./components/Search/search";
+import AdminPage from "./pages/admin/admin";
+import DetailPage from "./pages/detailpage/detailpage";
+import PhoneDetailPage from "./pages/detailpage/detailPage1";
+import CartPage from "./pages/cartpage/CartPage";
+import ListProduct from "./pages/listProduct/listProduct";
+import ForgotPasswordPage from "./pages/forgotPasswordPage/forgotPasswordPage";
+import VerifyCodePage from "./pages/forgotPasswordPage/verifyCode";
+import ResetPasswordPage from "./pages/forgotPasswordPage/resetPassword";
+import ProductManagerPage from "./pages/admin/productManager";
+import UserManagerPage from "./pages/admin/UserManager";
+import AccountPage from "./pages/account/account";
+import ProtectedRoute from "./util/protectedRoute.jsx";
 
 export const router = createBrowserRouter([
   // user routes
@@ -21,8 +33,23 @@ export const router = createBrowserRouter([
   // admin routes
   {
     path: "/admin",
-    element: <App />,
-    children: [{ path: "products", element: <h2>Children products</h2> }],
+    element: <AdminPage />,
+    children: [
+      <ProtectedRoute key="products" requiredRole="admin">
+        <ProductManagerPage />
+      </ProtectedRoute>,
+      <ProtectedRoute key="users" requiredRole="admin">
+        <UserManagerPage />
+      </ProtectedRoute>,
+      {
+        index: true,
+        element: (
+          <ProtectedRoute requiredRole="admin">
+            <UserManagerPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
   // Route lỗi
   {

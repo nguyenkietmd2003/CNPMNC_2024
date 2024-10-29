@@ -7,7 +7,7 @@ import "./search.css";
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 const SearchComponent = ({ style }) => (
   <Search
-    placeholder="input search text"
+    placeholder="tìm kiếm sản phẩm"
     allowClear
     enterButton="Search"
     size="large"
