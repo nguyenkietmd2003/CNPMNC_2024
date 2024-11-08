@@ -27,6 +27,14 @@ export default class Product extends Model {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 0
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    img: {
+      type: DataTypes.STRING(200),
+      allowNull: true
     }
   }, {
     sequelize,
