@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { List, Card, Image, Typography, Select, Row, Col } from "antd";
-import { getProductByTag } from "../../util/api";
+import {
+  getCategoryByTag,
+  getProductByCategory,
+  getProductByTag,
+} from "../../util/api";
 import { useNavigate } from "react-router-dom";
 
 const { Meta } = Card;
@@ -10,6 +14,7 @@ const { Option } = Select;
 const ListProduct = ({ id }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]); // category name updated here
   const [sortOrder, setSortOrder] = useState("asc"); // Trạng thái sắp xếp
 
   useEffect(() => {
@@ -22,8 +27,18 @@ const ListProduct = ({ id }) => {
       }
     };
 
+    const fetchCategoryByTag = async (id_tag) => {
+      try {
+        const result = await getCategoryByTag(id_tag);
+        setCategories(result.message.message); // Accessing categories from the correct path
+      } catch (error) {
+        console.log("Error fetching categories:", error);
+      }
+    };
+
     if (id) {
       fetchData(id);
+      fetchCategoryByTag(id);
     }
   }, [id]);
 
@@ -31,12 +46,15 @@ const ListProduct = ({ id }) => {
   const sortedProducts = [...products].sort((a, b) => {
     return sortOrder === "asc" ? a.price - b.price : b.price - a.price;
   });
-
-  // Hàm xử lý sự kiện click cho dòng iPhone
-  const handleIphoneClick = (iphoneModel) => {
-    console.log(`Clicked on: ${iphoneModel}`);
+  const getProductByCategory1 = async (id) => {
+    try {
+      const data = await getProductByCategory(id);
+      console.log(data.message);
+      setProducts(data.message);
+    } catch (error) {
+      console.log(error);
+    }
   };
-
   return (
     <div style={{ backgroundColor: "#f0f2f5", padding: "20px" }}>
       {/* Dropdown để chọn phương thức sắp xếp */}
@@ -49,51 +67,49 @@ const ListProduct = ({ id }) => {
         <Option value="desc">Giá: Cao đến Thấp</Option>
       </Select>
 
-      {/* Dòng thể hiện các dòng iPhone */}
-      {/* <Row gutter={16} style={{ marginBottom: 20 }}>
-        <Col span={4}>
-          <Card
-            title="iPhone 14"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone 14")}
-          />
-        </Col>
-        <Col span={4}>
-          <Card
-            title="iPhone 13"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone 13")}
-          />
-        </Col>
-        <Col span={4}>
-          <Card
-            title="iPhone 12"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone 12")}
-          />
-        </Col>
-        <Col span={4}>
-          <Card
-            title="iPhone 11"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone 11")}
-          />
-        </Col>
-        <Col span={4}>
-          <Card
-            title="iPhone SE"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone SE")}
-          />
-        </Col>
-        <Col span={4}>
-          <Card
-            title="iPhone XR"
-            style={{ width: "100%", height: "80px", textAlign: "center" }}
-            onClick={() => handleIphoneClick("iPhone XR")}
-          />
-        </Col>
-      </Row> */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        {categories.map((category) => (
+          <Col
+            span={4}
+            key={category.id_category}
+            style={{ textAlign: "center" }}
+          >
+            <Card
+              hoverable
+              style={{
+                borderRadius: "10px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                padding: "10px", // Giảm padding để card nhỏ lại
+              }}
+              onClick={() => {
+                getProductByCategory1(category.id_category);
+              }} // Lọc sản phẩm theo category
+            >
+              <Image
+                alt={category.title}
+                src={category.img}
+                style={{
+                  width: "25px", // Giảm chiều rộng hình ảnh
+                  height: "25px", // Giảm chiều cao hình ảnh
+                  objectFit: "contain",
+                  borderRadius: "10px",
+                }}
+                preview={false}
+              />
+              <Text
+                strong
+                style={{
+                  display: "block",
+                  fontSize: "14px", // Giảm kích thước font chữ
+                  color: "#333",
+                }}
+              >
+                {category.title}
+              </Text>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       <List
         grid={{ gutter: 16, column: 4 }} // Điều chỉnh số cột và khoảng cách

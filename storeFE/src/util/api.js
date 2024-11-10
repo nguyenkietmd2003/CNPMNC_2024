@@ -67,5 +67,13 @@ export const getInfo = (id) => {
   const URL_API = `/v1/apiUser/get-info`;
   return axios.post(URL_API, { id: id });
 };
+export const getCategoryByTag = (id_tag) => {
+  const URL_API = `/v1/apiCategory/get-category-byTag/${id_tag}`;
+  return axios.get(URL_API);
+};
+export const getProductByCategory = (id) => {
+  const URL_API = `/v1/apiProduct/get-product-by-category/${id}`;
+  return axios.post(URL_API);
+};
 
 export { getAllUser, loginAPI, registerAPI };

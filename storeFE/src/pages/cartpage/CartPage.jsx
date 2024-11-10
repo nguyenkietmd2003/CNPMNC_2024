@@ -69,12 +69,20 @@ const CartPage = () => {
         return item;
       }).filter(Boolean); // Lọc các sản phẩm null
 
+      // Cập nhật lại tổng tiền
+      const newTotalAmount = updatedCartItems.reduce(
+        (total, item) =>
+          total + item.price * item.quantity * (1 - item.discount / 100),
+        0
+      );
+
       return {
         ...prevCart,
         data: {
           ...prevCart.data,
           CartItems: updatedCartItems,
         },
+        totalAmount: newTotalAmount, // Cập nhật lại tổng tiền
       };
     });
   };
@@ -177,7 +185,12 @@ const CartPage = () => {
               </span>
             }
           >
-            <Button type="primary" onClick={() => {}}>
+            <Button
+              type="primary"
+              onClick={() => {
+                navigate("/");
+              }}
+            >
               Đi đến sản phẩm
             </Button>
           </Empty>

@@ -28,6 +28,20 @@ const CarouselHomePage = () => (
     <div>
       <div style={contentStyle}>
         <img
+          src="https://file.hstatic.net/1000198144/article/cover-18_18102024064844.jpg_18102024064844_6094a7c140fe40e98cf2758f696e6528_large.jpg"
+          alt="Image 4"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+        <div style={descriptionStyle}>Tính năng mới trên iphone</div>
+      </div>
+    </div>
+    <div>
+      <div style={contentStyle}>
+        <img
           src="https://file.hstatic.net/1000198144/file/8457359_tinhte-tinhte-unbox-iphone-16-pro--13.jpg"
           alt="Image 1"
           style={{
