@@ -119,9 +119,11 @@ export const loginUserService = async (email, password) => {
     if (!user) throw new Error("User not found");
     if (user.password === password) {
       const payload = {
+        id: user.id_user,
         name: user.name,
-        gmail: user.gmail,
+        email: user.email,
         phone: user.phone,
+        role: user.role,
       };
       const access_token = await createToken(payload);
       return {
@@ -164,7 +166,21 @@ export const registerService = async (data) => {
   try {
     const result = await model.User.create(newUser);
     if (!result) throw Error("Couldn't create User");
-    return { message: "Create User successfully" };
+    else {
+      let hexCart;
+      let existingCart;
+      do {
+        hexCart = crypto.randomInt(1000, 9999);
+        existingCart = await model.Cart.findOne({
+          where: { id_cart: hexCart },
+        });
+      } while (existingCart);
+      await model.Cart.create({
+        id_cart: hexCart,
+        id_user: newUser.id_user,
+      });
+      return { message: "Create User successfully" };
+    }
   } catch (error) {
     throw error;
   }
@@ -221,6 +237,17 @@ export const resetPasswordService = async (email, password) => {
     });
     await model.VerificationCodes.destroy({ where: { id_user: user.id_user } });
     return { message: "Password reset successfully" };
+  } catch (error) {
+    throw error;
+  }
+};
+export const getInfoService = async (id) => {
+  try {
+    const data = await model.User.findOne({
+      where: { id_user: id },
+    });
+    if (data) return data;
+    return { message: "User not found" };
   } catch (error) {
     throw error;
   }

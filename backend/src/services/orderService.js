@@ -3,9 +3,208 @@ import { sequelize } from "../config/database.js";
 import CartItem from "../models/CartItem.js";
 import Product from "../models/Product.js";
 
+import crypto from "crypto";
+
+//
 let model = initModels(sequelize);
+//
+
+export const getAllOrderService = async () => {
+  try {
+    const data = await model.OrderItem.findAll({
+      include: [
+        { model: model.Product, as: "id_product_Product" },
+        { model: model.Order, as: "id_order_Order" },
+        { model: model.ProductVariant, as: "id_productVariant_ProductVariant" },
+      ],
+    });
+    return { message: data };
+  } catch (error) {
+    throw error;
+  }
+};
+export const getMyOrderService = async (id_user) => {
+  try {
+    const checkOrder = await model.Order.findAll({
+      where: { id_user: id_user },
+    });
+    if (checkOrder && checkOrder.length > 0) {
+      const getOrder = await model.Order.findAll({
+        where: { id_user: id_user },
+        include: [
+          {
+            model: model.OrderItem,
+            as: "OrderItems",
+            include: [
+              {
+                model: model.ProductVariant,
+                as: "id_productVariant_ProductVariant",
+                include: [
+                  {
+                    model: model.Color,
+                    as: "id_color_Color",
+                  },
+                  { model: model.Rom, as: "id_rom_Rom" },
+                ],
+              },
+            ],
+          },
+          {
+            model: model.Transaction,
+            as: "Transactions",
+          },
+        ],
+      });
+      return { message: getOrder };
+    } else return [];
+  } catch (error) {
+    throw error;
+  }
+};
+//
+export const orderService = async (id_user, orderData) => {
+  const { name, phone, address, total, products } = orderData;
+  console.log(orderData);
+  //
+  const generateUniqueOrderItemId = async () => {
+    let hexOrderItem;
+    let existOrderItem;
+    do {
+      hexOrderItem = crypto.randomInt(1, 9999); // Tạo một ID ngẫu nhiên trong khoảng từ 1 đến 9999
+      existOrderItem = await model.OrderItem.findOne({
+        where: { id_orderItem: hexOrderItem },
+      });
+    } while (existOrderItem);
+    return hexOrderItem; // Trả về ID duy nhất
+  };
+
+  //
+  try {
+    let hex;
+    let existOrder;
+    do {
+      hex = crypto.randomInt(1, 9999);
+      existOrder = await model.Order.findOne({ where: { id_order: hex } });
+    } while (existOrder);
+
+    const newOrder = await model.Order.create({
+      id_order: hex,
+      name,
+      phone,
+      addresss: address,
+      total,
+      id_user,
+      is_delete: false,
+    });
+    if (!newOrder) throw new Error("Failed to create Order");
+    const orderID = newOrder.id_order;
+    // const orderItems = products.map((product) => ({
+    //   hex: {},
+    //   id_order: orderID,
+    //   id_product: product.id_product,
+    // }));
+
+    const orderItems = [];
+    for (const product of products) {
+      const uniqueId = await generateUniqueOrderItemId(); // Gọi hàm để lấy ID duy nhất
+      orderItems.push({
+        id_orderItem: uniqueId, // Sử dụng ID duy nhất
+        id_order: orderID,
+        id_product: product.id_product,
+        is_delete: false,
+        id_productVariant: product.id_productVariant,
+      });
+    }
+
+    console.log(orderItems);
+    const createItemOrder = await model.OrderItem.bulkCreate(orderItems);
+    if (!createItemOrder) throw new Error("Failed to create ItemOrder");
+
+    let hexTransaction;
+    let exisTransaction;
+    do {
+      hexTransaction = crypto.randomInt(1, 9999);
+      exisTransaction = await model.Transaction.findOne({
+        where: { id_transaction: hexTransaction },
+      });
+    } while (exisTransaction);
+
+    const transaction = await model.Transaction.create({
+      id_transaction: hexTransaction,
+      status: false,
+      id_user,
+      createdAT: "",
+      id_order: orderID,
+    });
+    if (!transaction) return { message: "Failed Order" };
+    const order = await model.OrderItem.findAll({
+      where: { id_order: orderID },
+      include: [
+        {
+          model: model.Product,
+          as: "id_product_Product",
+          include: [
+            {
+              model: model.ProductVariant,
+              as: "ProductVariants",
+            },
+          ],
+        },
+        {
+          model: model.Order,
+          as: "id_order_Order",
+        },
+      ],
+    });
+    return { message: "Order successfully", data: order };
+  } catch (error) {
+    throw error;
+  }
+};
+//
+//
+export const increaseCartService = async (id_cartItem) => {
+  try {
+    let cartItem = await model.CartItem.findOne({ where: { id_cartItem } });
+
+    if (!cartItem) {
+      return {
+        message: "Cart item not found",
+      };
+    }
+
+    cartItem.quantity += 1;
+    await cartItem.save();
+
+    return { message: "Quantity increased" };
+  } catch (error) {
+    return { message: "Error increasing quantity" };
+  }
+};
+
+export const decreaseCartService = async (id_cartItem) => {
+  try {
+    let cartItem = await model.CartItem.findOne({ where: { id_cartItem } });
+
+    if (!cartItem) {
+      return { message: "Cart item not found" };
+    }
+
+    // Giảm số lượng, nếu về 0 thì xóa luôn
+    if (cartItem.quantity > 1) {
+      cartItem.quantity -= 1;
+      await cartItem.save();
+      return { message: "Quantity decreased", cartItem };
+    } else {
+      await cartItem.destroy();
+      return { message: "Cart item deleted as quantity reached 0" };
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+//
 export const getCartService = async (id_user) => {
-  // ai la nguoi dat ==> Có cart ==> cart item từ cart ==>
   try {
     const cart = await model.Cart.findOne({
       where: { id_user: id_user },
@@ -17,53 +216,110 @@ export const getCartService = async (id_user) => {
             {
               model: Product,
               as: "id_product_Product",
+              include: [
+                {
+                  model: model.ProductVariant,
+                  as: "ProductVariants",
+                  include: [
+                    {
+                      model: model.Rom,
+                      as: "id_rom_Rom",
+                    },
+                    {
+                      model: model.Color,
+                      as: "id_color_Color",
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
       ],
     });
-    if (!cart || cart.CartItems.length === 0) {
-      return { message: "Cart items not found" };
+
+    if (!cart || !cart.CartItems || cart.CartItems.length === 0) {
+      return {
+        message: "Cart is empty",
+        data: { id_cart: cart.id_cart },
+        totalAmount: 0,
+      };
     }
+
     let totalAmount = 0;
-    cart.CartItems.forEach(async (item) => {
+    cart.CartItems.forEach((item) => {
       totalAmount += item.price * item.quantity;
     });
+
+    return { message: "Get cart successfully", data: cart, totalAmount };
   } catch (error) {
     throw error;
   }
 };
 
-export const orderService = async (id_user, orderData) => {
-  const { name, phone, address } = orderData;
+export const deleteCartService = async (id_user) => {
+  try {
+    const checkCart = await model.Cart.findOne({
+      where: { id_user: id_user },
+    });
+    const deleteCartitem = await model.CartItem.destroy({
+      where: { id_cart: checkCart.id_cart },
+    });
+    if (!deleteCartitem) {
+      throw new Error("Delete cart failed");
+    }
+    return { message: "Delete cart successfully" };
+  } catch (error) {
+    throw error;
+  }
+};
+export const addCartService = async (data) => {
+  const { id_user, id_product, quantity, price, discount, id_productVariant } =
+    data;
 
   try {
-    let total = 0;
-    let discount = 0;
-
-    //
-    const Cart = await model.Cart.findAll({
+    const getIDCart = await model.Cart.findOne({
       where: { id_user: id_user },
-      include: [
-        {
-          model: model.CartItem,
-          as: "CartItems",
-          include: [
-            {
-              model: model.Product,
-              as: "id_product_Product",
-            },
-          ],
-        },
-      ],
     });
-    if (!Cart) throw new Error("Cart item not found");
-    Cart.forEach((item) => {
-      item.forEach((item) => {});
+    let id_cart;
+    if (getIDCart) id_cart = getIDCart?.id_cart;
+    // Kiểm tra xem sản phẩm với biến thể cụ thể (màu sắc, dung lượng) đã có trong giỏ hàng chưa
+    let cartItem = await model.CartItem.findOne({
+      where: { id_cart, id_product, id_productVariant },
     });
-    console.log(total);
-    return total;
+
+    if (cartItem) {
+      // Nếu sản phẩm đã tồn tại, cập nhật số lượng
+      cartItem.quantity += quantity;
+      await cartItem.save();
+      return { message: "Cart item updated", data: cartItem };
+    } else {
+      // Nếu sản phẩm chưa có trong giỏ hàng, thêm mới
+      let hex;
+      let existing;
+      do {
+        hex = crypto.randomInt(1, 9999);
+        existing = await model.CartItem.findOne({
+          where: { id_cartItem: hex },
+        });
+      } while (existing);
+
+      // Tạo mới một mục trong giỏ hàng
+      cartItem = await model.CartItem.create({
+        id_cartItem: hex,
+        id_cart: id_cart,
+        id_product: id_product,
+        quantity: quantity,
+        price: price,
+        discount: discount,
+        createAT: null,
+        id_productVariant,
+        is_delete: false,
+      });
+      return { message: "Product added to cart", data: cartItem };
+    }
   } catch (error) {
+    // Xử lý lỗi nếu có
     throw error;
   }
 };

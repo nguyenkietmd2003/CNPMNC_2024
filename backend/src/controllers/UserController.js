@@ -8,6 +8,7 @@ import {
   forgotPasswordService,
   verifyCodeService,
   resetPasswordService,
+  getInfoService,
 } from "../services/userService.js";
 
 export const getFullUser = async (req, res) => {
@@ -127,7 +128,7 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
     const data = await forgotPasswordService(email);
-    return res.status(200).json(data);
+    return res.status(200).json({ status: 200, data: data });
   } catch (error) {
     console.log(">>> check forgotPassword : " + error.message);
     if (error.message === "Password sent to email successfully") {
@@ -142,12 +143,10 @@ export const verifyCode = async (req, res) => {
   }
   try {
     const data = await verifyCodeService(email, code);
-    res.status(200).json(data);
+    res.status(200).json({ status: 200, data: data });
   } catch (error) {
     console.log(">>> check verifyCode : " + error.message);
-    if (error.message === "Code sent to email successfully") {
-      return res.status(400).json({ message: error.message });
-    } else return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -155,11 +154,20 @@ export const resetPassword = async (req, res) => {
   const { email, password } = req.body;
   try {
     const data = await resetPasswordService(email, password);
-    return res.status(200).json(data);
+    return res.status(200).json({ data: data, status: 200 });
   } catch (error) {
     console.log(">>>check resetPassword : " + error.message);
     if (error.message === "Password updated successfully") {
       return res.status(400).json({ message: error.message });
     } else return res.status(500).json({ message: "Internal server error" });
+  }
+};
+export const getInfo = async (req, res) => {
+  const { id } = req.body;
+  try {
+    const data = await getInfoService(id);
+    return res.status(200).json({ data: data, status: 200 });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
   }
 };

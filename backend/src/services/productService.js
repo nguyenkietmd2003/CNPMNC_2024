@@ -1,11 +1,10 @@
 import { sequelize } from "../config/database.js";
 import initModels from "../models/init-models.js";
 import Product from "../models/Product.js";
-import CartItem from "../models/CartItem.js";
 import crypto from "crypto";
 import Category from "../models/Category.js";
 import Category_Product from "../models/Category_Product.js";
-import { Op } from "sequelize"; // Đảm bảo đã import Op
+import { Op } from "sequelize";
 import TagCategory from "../models/TagCategory.js";
 
 //
@@ -24,10 +23,26 @@ export const getProductByIDService = async (id) => {
         {
           model: modell.ProductVariant,
           as: "ProductVariants",
+          include: [
+            {
+              model: modell.Color,
+              as: "id_color_Color",
+            },
+            {
+              model: modell.Rom,
+              as: "id_rom_Rom",
+            },
+          ],
         },
         {
           model: modell.ProductReview,
           as: "ProductReviews",
+          include: [
+            {
+              model: modell.UserReview,
+              as: "id_userReview_UserReview",
+            },
+          ],
         },
       ],
     });
@@ -37,7 +52,7 @@ export const getProductByIDService = async (id) => {
   }
 };
 
-export const getAllProduct = async () => {
+export const getAllProductService = async () => {
   try {
     const data = await modell.Product.findAll();
     if (!data) {

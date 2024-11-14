@@ -9,6 +9,7 @@ import {
   forgotPassword,
   verifyCode,
   resetPassword,
+  getInfo,
 } from "./../controllers/UserController.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
@@ -19,8 +20,7 @@ userRouter.get("/hello", (req, res) => {
 
 //---------------------------------------------------------------- CRUD
 
-userRouter.get("/getAllUser", authMiddleware, getFullUser);
-
+userRouter.get("/getAllUser", getFullUser);
 userRouter.post("/create-user", createUser);
 userRouter.post("/update-user/:id", updateUser);
 userRouter.post("/delete-user/:id", deleteUser);
@@ -31,5 +31,6 @@ userRouter.post("/register-user", registerUser);
 userRouter.post("/forgot-password-user", forgotPassword);
 userRouter.post("/verify-code", verifyCode);
 userRouter.post("/reset-pass", resetPassword);
+userRouter.post("/get-info", getInfo);
 
 export default userRouter;

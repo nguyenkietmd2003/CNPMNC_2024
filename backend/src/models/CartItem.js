@@ -46,6 +46,14 @@ export default class CartItem extends Model {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 0
+    },
+    id_productVariant: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'ProductVariant',
+        key: 'id_productVariant'
+      }
     }
   }, {
     sequelize,
@@ -72,6 +80,13 @@ export default class CartItem extends Model {
         using: "BTREE",
         fields: [
           { name: "id_product" },
+        ]
+      },
+      {
+        name: "fk_product_cartitem",
+        using: "BTREE",
+        fields: [
+          { name: "id_productVariant" },
         ]
       },
     ]

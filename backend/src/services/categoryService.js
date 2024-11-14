@@ -6,6 +6,19 @@ import { sequelize } from "./../config/database.js";
 let model = initModels(sequelize);
 
 //
+export const getCategoryByTagService = async (id_tag) => {
+  try {
+    const getCategory = await model.Category.findAll({
+      where: { id_tag: id_tag },
+    });
+    if (!getCategory) {
+      throw Error("Couldn't find category by tag");
+    }
+    return { message: getCategory };
+  } catch (error) {
+    throw error;
+  }
+};
 export const getCategoryService = async () => {
   try {
     const data = await model.Category.findAll();

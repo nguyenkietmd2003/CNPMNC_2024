@@ -21,6 +21,7 @@ const productRouter = express.Router();
 productRouter.post("/get-product-by-category/:id", getProductByCategory);
 productRouter.post("/get-product-by-tag/:id", getProductByTag);
 productRouter.post("/get-product-by-id/:id", getProductByID);
+productRouter.get("/get-allProduct", getProduct);
 
 //////////////////////////////////// CRUD
 productRouter.get("/get-product", getProduct);

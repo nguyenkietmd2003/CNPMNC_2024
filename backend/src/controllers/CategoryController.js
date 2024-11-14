@@ -1,8 +1,18 @@
 import {
   createCategoryService,
+  getCategoryByTagService,
   getCategoryService,
 } from "../services/categoryService.js";
 
+export const getCategoryByTag = async (req, res) => {
+  const { id_tag } = req.params;
+  try {
+    const result = await getCategoryByTagService(id_tag);
+    return res.status(200).json({ status: 200, message: result });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
 export const getCategory = async (req, res) => {
   try {
     const result = await getCategoryService();
@@ -33,3 +43,5 @@ export const createCategory = async (req, res) => {
         .json({ status: 500, message: "Internal server error" });
   }
 };
+
+//----------------------------------------------------------------
